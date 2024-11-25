@@ -1,34 +1,54 @@
-import { createSlice } from "@reduxjs/toolkit";
+import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 interface User {
   name: string;
   email: string;
   password: string;
 }
+
+interface UserState {
+  users: User[];
+  loggedInUser: User | null;
+  status: string;
+}
+
+const initialState: UserState = {
+  users: [],
+  loggedInUser: null,
+  status: "loggedOut",
+};
+
 const userSlice = createSlice({
   name: "user",
-  initialState: {
-    users: [],
-    loggedInUser: null,
-    status: "loggedOut",
-  },
+  initialState,
   reducers: {
-    register: () => {
-      // Implement user registration logic here
+    register: (state, action: PayloadAction<User>) => {
+      const existingUser = state.users.find(
+        (user) => user.email === action.payload.email
+      );
+      if (!existingUser) {
+        state.users.push(action.payload); // Tambahkan pengguna baru
+        state.status = "Registered"; // Ubah status menjadi "Registered"
+      } else {
+        console.log("User already exists.");
+      }
     },
-    login: (state, action) => {
+    login: (state, action: PayloadAction<{ email: string; password: string }>) => {
       const user = state.users.find(
-        (user: User) =>
+        (user) =>
           user.email === action.payload.email &&
           user.password === action.payload.password
       );
       if (user) {
         state.loggedInUser = user;
         state.status = "loggedIn";
+      } else {
+        console.log("Invalid email or password.");
       }
     },
-    logout: () => {
-      // Implement user logout logic here
+    logout: (state) => {
+      state.loggedInUser = null; // Atur ulang pengguna yang masuk
+      state.status = "loggedOut"; // Ubah status menjadi "loggedOut"
     },
   },
 });
